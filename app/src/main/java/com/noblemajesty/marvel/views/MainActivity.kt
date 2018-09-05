@@ -4,11 +4,13 @@ import android.app.SearchManager
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import com.noblemajesty.marvel.R
 import com.noblemajesty.marvel.contracts.MainActivityContract
 import com.noblemajesty.marvel.presenters.MainActivityPresenter
+import com.noblemajesty.marvel.utils.Utils
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.toast
 
@@ -39,9 +41,11 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
                     toast("Character selected").show()
                     true }
                 R.id.marvel_creators -> {
-                    toast("Creator selected").show()
+                    toast("Creators").show()
+                    Log.e("Hash", Utils.hashWithAlgorithm(stringToBeHashed = "132b4fd917550adcbb2b5e9e78dd6e6ed4e7c41e568fc19df163796f9a709aea430733b2c"))
                     true }
                 R.id.marvel_stories -> {
+
                     toast("Stories selected").show()
                     true }
                 R.id.marvel_events -> {
