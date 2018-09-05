@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto">
+
+  <item
+    android:id="@+id/marvel_characters"
+    android:enabled="true"
+    android:title="Characters"
+    android:icon="@drawable/ic_characters_white_24dp"
+    app:showAsAction="ifRoom"/>
+
+  <item
+    android:id="@+id/marvel_stories"
+    android:enabled="true"
+    android:title="Stories"
+    android:icon="@drawable/ic_stories_black_24dp"
+    app:showAsAction="ifRoom"/>
+
+  <item
+    android:id="@+id/marvel_events"
+    android:enabled="true"
+    android:title="Events"
+    android:icon="@drawable/ic_event_white_24dp"
+    app:showAsAction="ifRoom"/>
+
+  <item
+    android:id="@+id/marvel_creators"
+    android:enabled="true"
+    android:title="Creators"
+    android:icon="@drawable/ic_creators_24dp"
+    app:showAsAction="ifRoom"/>
+
+</menu>
