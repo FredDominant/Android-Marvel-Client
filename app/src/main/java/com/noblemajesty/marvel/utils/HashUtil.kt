@@ -2,7 +2,7 @@ package com.noblemajesty.marvel.utils
 
 import java.security.MessageDigest
 
-object Utils {
+object HashUtil {
     private val instance = "MD5"
 
     // referenced from https://www.samclarke.com/kotlin-hash-strings/

@@ -10,7 +10,7 @@ import android.view.MenuItem
 import com.noblemajesty.marvel.R
 import com.noblemajesty.marvel.contracts.MainActivityContract
 import com.noblemajesty.marvel.presenters.MainActivityPresenter
-import com.noblemajesty.marvel.utils.Utils
+import com.noblemajesty.marvel.utils.HashUtil
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.toast
 
@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
                     true }
                 R.id.marvel_creators -> {
                     toast("Creators").show()
-                    Log.e("Hash", Utils.hashWithAlgorithm(stringToBeHashed = "132b4fd917550adcbb2b5e9e78dd6e6ed4e7c41e568fc19df163796f9a709aea430733b2c"))
+                    Log.e("Hash", HashUtil.hashWithAlgorithm(stringToBeHashed = "132b4fd917550adcbb2b5e9e78dd6e6ed4e7c41e568fc19df163796f9a709aea430733b2c"))
                     true }
                 R.id.marvel_stories -> {
 
