@@ -2,6 +2,8 @@ package com.noblemajesty.marvel.models.getCharacters
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
@@ -26,6 +28,8 @@ class MarvelCharacters : Parcelable {
     override fun describeContents(): Int {
         return 0
     }
+
+    fun toJson() : JsonObject = Gson().toJsonTree(this).asJsonObject
 
     companion object {
         val CREATOR: Parcelable.Creator<MarvelCharacters> = object : Parcelable.Creator<MarvelCharacters> {
