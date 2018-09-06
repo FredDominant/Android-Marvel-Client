@@ -26,6 +26,8 @@ class MarvelRetrofitBuilder (private val pk: String, private val prk: String) {
                 .build()!!
     }
 
-    fun getService() : MarvelService? = getBuilder().create(MarvelService::class.java)
+    fun getService() : MarvelService {
+        return getBuilder().create(MarvelService::class.java)
+    }
 
 }

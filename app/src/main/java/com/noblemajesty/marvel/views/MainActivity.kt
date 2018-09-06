@@ -9,9 +9,14 @@ import android.view.Menu
 import android.view.MenuItem
 import com.noblemajesty.marvel.R
 import com.noblemajesty.marvel.contracts.MainActivityContract
+import com.noblemajesty.marvel.models.getCharacters.MarvelCharacters
+import com.noblemajesty.marvel.network.MarvelRetrofitBuilder
 import com.noblemajesty.marvel.presenters.MainActivityPresenter
 import com.noblemajesty.marvel.utils.HashUtil
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.toast
 
 class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView {
@@ -25,6 +30,16 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
         setContentView(R.layout.activity_main)
 
         val intentResult = intent.getBooleanExtra("Exit", false)
+
+        val allMarvelCharacters = async(CommonPool){
+            getMarvelCharacters("abcd", "abcd")
+        }
+
+        launch(CommonPool) {
+            val apiResponse = allMarvelCharacters.await()
+            Log.e("Api response", apiResponse.toString())
+        }
+
 
         if (intentResult) {
             return finish()
@@ -55,6 +70,16 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
                 else -> true
             }
         }
+    }
+
+    suspend fun getMarvelCharacters (publicKey: String, privateKey: String) : MarvelCharacters? {
+        val marvelRetrofitBuilder = MarvelRetrofitBuilder(publicKey, privateKey).getService()
+        val hashMap = HashMap<String, String>()
+
+        hashMap["hash"] = "abcdef"
+        hashMap["ts"] = System.currentTimeMillis().div(1000).toString()
+        return marvelRetrofitBuilder.listCharacters(hashMap).execute().body()
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

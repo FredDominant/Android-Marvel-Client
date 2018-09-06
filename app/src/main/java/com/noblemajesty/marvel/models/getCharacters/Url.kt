@@ -17,8 +17,6 @@ class Url : Parcelable {
         this.url = `in`.readValue(String::class.java.classLoader) as String
     }
 
-    constructor() {}
-
     override fun writeToParcel(dest: Parcel, flags: Int) {
         dest.writeValue(type)
         dest.writeValue(url)
@@ -36,7 +34,7 @@ class Url : Parcelable {
                 return Url(`in`)
             }
 
-            override fun newArray(size: Int): Array<Url> {
+            override fun newArray(size: Int): Array<Url?> {
                 return arrayOfNulls(size)
             }
 

@@ -19,8 +19,6 @@ class MarvelCharacters : Parcelable {
         this.data = `in`.readValue(Data::class.java.classLoader) as Data
     }
 
-    constructor() {}
-
     override fun writeToParcel(dest: Parcel, flags: Int) {
         dest.writeValue(data)
     }
