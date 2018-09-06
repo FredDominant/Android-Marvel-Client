@@ -6,15 +6,15 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class MarvelRetrofitBuilder (private val pk: String, private val prk: String) {
+class MarvelRetrofitBuilder (private val timeStamp: String, private val pk: String, private val hash: String) {
 
     val baseUrl = "https://gateway.marvel.com/"
 
-    fun getInterceptor() : Interceptor = MarvelInterceptor(pk, prk)
+    fun getInterceptor() : Interceptor = MarvelInterceptor(timeStamp, pk, hash)
 
     fun getHttpLoggingInterceptor() : HttpLoggingInterceptor{
         val loggingInterceptor = HttpLoggingInterceptor()
-        loggingInterceptor.level = HttpLoggingInterceptor.Level.BASIC
+        loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
         return loggingInterceptor
     }
 

@@ -32,12 +32,16 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
         val intentResult = intent.getBooleanExtra("Exit", false)
 
         val allMarvelCharacters = async(CommonPool){
-            getMarvelCharacters("abcd", "abcd")
+            try {
+                getMarvelCharacters("68fc19df163796f9a709aea430733b2c", "32b4fd917550adcbb2b5e9e78dd6e6ed4e7c41e5")
+            } catch (error: Exception) {
+                Log.e("Network Error:", error.localizedMessage)
+            }
         }
 
         launch(CommonPool) {
             val apiResponse = allMarvelCharacters.await()
-            Log.e("Api response", apiResponse.toString())
+            Log.e("Api response", "$apiResponse")
         }
 
 
@@ -57,7 +61,6 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
                     true }
                 R.id.marvel_creators -> {
                     toast("Creators").show()
-                    Log.e("Hash", HashUtil.hashWithAlgorithm(stringToBeHashed = "132b4fd917550adcbb2b5e9e78dd6e6ed4e7c41e568fc19df163796f9a709aea430733b2c"))
                     true }
                 R.id.marvel_stories -> {
 
@@ -72,13 +75,15 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
         }
     }
 
-    suspend fun getMarvelCharacters (publicKey: String, privateKey: String) : MarvelCharacters? {
-        val marvelRetrofitBuilder = MarvelRetrofitBuilder(publicKey, privateKey).getService()
-        val hashMap = HashMap<String, String>()
+    fun getMarvelCharacters (publicKey: String, privateKey: String) : MarvelCharacters? {
 
-        hashMap["hash"] = "abcdef"
-        hashMap["ts"] = System.currentTimeMillis().div(1000).toString()
-        return marvelRetrofitBuilder.listCharacters(hashMap).execute().body()
+        val timeStamp = System.currentTimeMillis().div(1000).toString()
+
+        val hash = HashUtil.hashWithAlgorithm(stringToBeHashed = timeStamp + privateKey + publicKey)
+
+        val marvelRetrofitBuilder = MarvelRetrofitBuilder(timeStamp, publicKey, hash).getService()
+
+        return marvelRetrofitBuilder.listCharacters(HashMap()).execute().body()
 
     }
 
