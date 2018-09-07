@@ -1,9 +1,6 @@
 *.iml
 .gradle
 /local.properties
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
 .DS_Store
 /build
 /captures
@@ -11,5 +8,4 @@
 
 .idea/*
 instapk.log*
-.idea/instapk.xml
 /app/src/main/java/com/noblemajesty/marvel/utils/SecretUtils.kt
