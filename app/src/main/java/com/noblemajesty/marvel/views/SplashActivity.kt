@@ -3,9 +3,11 @@ package com.noblemajesty.marvel.views
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import com.noblemajesty.marvel.models.getCharacters.MarvelCharacters
-import com.noblemajesty.marvel.network.MarvelRetrofitBuilder
-import com.noblemajesty.marvel.utils.HashUtil
+import com.noblemajesty.marvel.utils.MarvelNetworkCall.getMarvelCharacters
+import com.noblemajesty.marvel.utils.NetworkConnectivity
+import com.noblemajesty.marvel.utils.SecretUtils
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
@@ -21,35 +23,37 @@ class SplashActivity : AppCompatActivity() {
             return finish()
         }
 
-        val dataFromServer = async(CommonPool) {
-            try {
-                getMarvelCharacters("68fc19df163796f9a709aea430733b2c", "32b4fd917550adcbb2b5e9e78dd6e6ed4e7c41e5")
+        //TODO check connectivity
+        val connectivityChecker = NetworkConnectivity(this@SplashActivity).isConnected()
 
-            } catch (error: Exception) {
-                error.printStackTrace()
+        if (connectivityChecker) {
+            val dataFromServer = async(CommonPool) {
+                getMarvelCharacters(SecretUtils.publicKey, SecretUtils.privateKey)
             }
+
+            launch(CommonPool) {
+                val intent = Intent(this@SplashActivity, MainActivity::class.java)
+                try {
+                    val data = dataFromServer.await() as MarvelCharacters
+
+                    intent.putExtra("Characters", data.toJson().toString())
+                    startActivity(intent)
+                } catch (error: Exception) {
+                    Log.e("Network Error", error.message)
+                    sendErrorIntent()
+                }
+            }
+
+        } else {
+            sendErrorIntent()
         }
-
-        launch(CommonPool) {
-            val intent = Intent(this@SplashActivity, MainActivity::class.java)
-            val data = dataFromServer.await() as MarvelCharacters
-
-            intent.putExtra("Characters", data.toJson().toString())
-            startActivity(intent)
-        }
-
     }
 
-    suspend fun getMarvelCharacters (publicKey: String, privateKey: String) : MarvelCharacters? {
-
-        val timeStamp = System.currentTimeMillis().div(1000).toString()
-
-        val hash = HashUtil.hashWithAlgorithm(stringToBeHashed = timeStamp + privateKey + publicKey)
-
-        val marvelRetrofitBuilder = MarvelRetrofitBuilder(timeStamp, publicKey, hash).getService()
-
-        return marvelRetrofitBuilder.listCharacters(HashMap()).execute().body()
-
+    fun sendErrorIntent() {
+        val intent = Intent(this@SplashActivity, MainActivity::class.java)
+        intent.putExtra("Connectivity", false)
+        startActivity(intent)
     }
+
 }
 
