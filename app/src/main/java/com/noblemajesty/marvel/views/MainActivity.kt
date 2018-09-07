@@ -23,7 +23,7 @@ import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.toast
 
 class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView {
-    private var result: List<Result>? = null
+    private var result: List<Result> = listOf()
     override fun onCreate() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -31,6 +31,8 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        Log.e("onCreate", "called again")
 
         setBottomNavigation()
 
@@ -49,17 +51,20 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
                 return finish()
             }
 
-            val allCharactersIntent = intent.getStringExtra("Characters")
-            val marvelCharacters = Gson().fromJson(allCharactersIntent, MarvelCharacters::class.java)
-            result = (marvelCharacters.data as Data).results
-
-            result!!.forEach {
-                Log.e("details", "${it.name} ${it.id} ${it.description}")
-            }
-
             if (intent.action == Intent.ACTION_SEARCH) {
-                val query = intent.getStringExtra(SearchManager.QUERY) as String
+                handleSearch()
             }
+
+            val allCharactersIntent : String? = intent.getStringExtra("Characters")
+            val marvelCharacters : MarvelCharacters? = Gson().fromJson(allCharactersIntent, MarvelCharacters::class.java)
+
+            marvelCharacters?.let {
+                result = it.data?.results ?: return@let
+                result.forEach {
+                    Log.e("details", "${it.name} ${it.id} ${it.description}")
+                }
+            }
+
         }
     }
 
@@ -76,9 +81,8 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
 
         launch(CommonPool) {
             try {
-                result = ((allMarvelCharacters.await() as MarvelCharacters).data as Data).results
-
-                result!!.forEach {
+                result = allMarvelCharacters.await()?.data?.results ?: return@launch
+                result.forEach {
                     Log.e("after remaking call", "${it.name} ${it.id} ${it.description}")
                 }
             } catch(error: Exception) {
@@ -151,6 +155,11 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
             }
             else -> true
         }
+    }
+
+    private fun handleSearch() {
+        val query = intent.getStringExtra(SearchManager.QUERY) as String
+        toast(query).show()
     }
 
     override fun onBackPressed() {
