@@ -41,9 +41,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
                 .commit()
 
         if (!connectivity) {
-            Snackbar.make(container_main_activity, getString(R.string.main_activity_no_connectivity), Snackbar.LENGTH_INDEFINITE)
-                    .setAction("Retry") { getAllMarvelCharacters() }
-                    .show()
+            displayErrorSnackbar()
         } else {
             val intentResult = intent.getBooleanExtra("Exit", false)
 
@@ -65,22 +63,28 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
         }
     }
 
-    private fun getAllMarvelCharacters() {
-        try {
-            val allMarvelCharacters = async(CommonPool) {
-                getMarvelCharacters(SecretUtils.publicKey, SecretUtils.privateKey)
-            }
+    private fun displayErrorSnackbar() {
+        Snackbar.make(container_main_activity, getString(R.string.main_activity_no_connectivity), Snackbar.LENGTH_INDEFINITE)
+                .setAction("Retry") { getAllMarvelCharacters() }
+                .show()
+    }
 
-            launch(CommonPool) {
+    private fun getAllMarvelCharacters() {
+        val allMarvelCharacters = async(CommonPool) {
+            getMarvelCharacters(SecretUtils.publicKey, SecretUtils.privateKey)
+        }
+
+        launch(CommonPool) {
+            try {
                 result = ((allMarvelCharacters.await() as MarvelCharacters).data as Data).results
 
                 result!!.forEach {
                     Log.e("after remaking call", "${it.name} ${it.id} ${it.description}")
                 }
-
+            } catch(error: Exception) {
+                Log.e("Error in MainActivity", error.message)
+                displayErrorSnackbar()
             }
-        } catch (exception: Exception) {
-            exception.printStackTrace()
         }
     }
 
