@@ -7,15 +7,15 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import com.google.gson.Gson
 import com.noblemajesty.marvel.R
 import com.noblemajesty.marvel.contracts.MainActivityContract
-import com.noblemajesty.marvel.presenters.MainActivityPresenter
-import com.noblemajesty.marvel.utils.Utils
+import com.noblemajesty.marvel.models.getCharacters.Data
+import com.noblemajesty.marvel.models.getCharacters.MarvelCharacters
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.toast
 
 class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView {
-    val mainPresenter = MainActivityPresenter(this)
     override fun onCreate() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -25,6 +25,18 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
         setContentView(R.layout.activity_main)
 
         val intentResult = intent.getBooleanExtra("Exit", false)
+
+        val allCharactersIntent = intent.getStringExtra("Characters")
+
+        val marvelCharacters = Gson().fromJson(allCharactersIntent, MarvelCharacters::class.java)
+
+        val result = (marvelCharacters.data as Data).results
+
+//        toast("${result?.size}").show()
+
+        result!!.forEach {
+            Log.e("details", "${it.name} ${it.id} ${it.description}")
+        }
 
         if (intentResult) {
             return finish()
@@ -42,7 +54,6 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
                     true }
                 R.id.marvel_creators -> {
                     toast("Creators").show()
-                    Log.e("Hash", Utils.hashWithAlgorithm(stringToBeHashed = "132b4fd917550adcbb2b5e9e78dd6e6ed4e7c41e568fc19df163796f9a709aea430733b2c"))
                     true }
                 R.id.marvel_stories -> {
 
