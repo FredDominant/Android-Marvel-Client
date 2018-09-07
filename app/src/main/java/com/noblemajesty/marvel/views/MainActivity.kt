@@ -24,6 +24,10 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        supportFragmentManager.beginTransaction()
+            .add(R.id.frame_layout_main_activity, CharactersFragment(), null)
+            .commit()
+
         val intentResult = intent.getBooleanExtra("Exit", false)
 
         val allCharactersIntent = intent.getStringExtra("Characters")
@@ -31,8 +35,6 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
         val marvelCharacters = Gson().fromJson(allCharactersIntent, MarvelCharacters::class.java)
 
         val result = (marvelCharacters.data as Data).results
-
-//        toast("${result?.size}").show()
 
         result!!.forEach {
             Log.e("details", "${it.name} ${it.id} ${it.description}")
@@ -54,18 +56,38 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
                     true }
                 R.id.marvel_creators -> {
                     toast("Creators").show()
+                    switchToCreatorsTab()
                     true }
                 R.id.marvel_stories -> {
-
                     toast("Stories selected").show()
+                    switchToStoriesTab()
                     true }
                 R.id.marvel_events -> {
                     toast("Events selected").show()
+                    switchToEventsTab()
                     true }
 
                 else -> true
             }
         }
+    }
+
+    private fun switchToStoriesTab() {
+        supportFragmentManager.beginTransaction()
+                .replace(R.id.frame_layout_main_activity, StoriesFragment(), null)
+                .commit()
+    }
+
+    private fun switchToEventsTab() {
+        supportFragmentManager.beginTransaction()
+                .replace(R.id.frame_layout_main_activity, EventsFragment(), null)
+                .commit()
+    }
+
+    private fun switchToCreatorsTab() {
+        supportFragmentManager.beginTransaction()
+                .replace(R.id.frame_layout_main_activity, CreatorsFragment(), null)
+                .commit()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
