@@ -4,6 +4,7 @@ import android.app.SearchManager
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -12,10 +13,17 @@ import com.noblemajesty.marvel.R
 import com.noblemajesty.marvel.contracts.MainActivityContract
 import com.noblemajesty.marvel.models.getCharacters.Data
 import com.noblemajesty.marvel.models.getCharacters.MarvelCharacters
+import com.noblemajesty.marvel.models.getCharacters.Result
+import com.noblemajesty.marvel.utils.MarvelNetworkCall.getMarvelCharacters
+import com.noblemajesty.marvel.utils.SecretUtils
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.toast
 
 class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView {
+    private var result: List<Result>? = null
     override fun onCreate() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -24,35 +32,65 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        setBottomNavigation()
+
+        val connectivity = intent.getBooleanExtra("Connectivity", true)
+
         supportFragmentManager.beginTransaction()
-            .add(R.id.frame_layout_main_activity, CharactersFragment(), null)
-            .commit()
+                .add(R.id.frame_layout_main_activity, CharactersFragment(), null)
+                .commit()
 
-        val intentResult = intent.getBooleanExtra("Exit", false)
+        if (!connectivity) {
+            Snackbar.make(container_main_activity, getString(R.string.main_activity_no_connectivity), Snackbar.LENGTH_INDEFINITE)
+                    .setAction("Retry") { getAllMarvelCharacters() }
+                    .show()
+        } else {
+            val intentResult = intent.getBooleanExtra("Exit", false)
 
-        val allCharactersIntent = intent.getStringExtra("Characters")
+            if (intentResult) {
+                return finish()
+            }
 
-        val marvelCharacters = Gson().fromJson(allCharactersIntent, MarvelCharacters::class.java)
+            val allCharactersIntent = intent.getStringExtra("Characters")
+            val marvelCharacters = Gson().fromJson(allCharactersIntent, MarvelCharacters::class.java)
+            result = (marvelCharacters.data as Data).results
 
-        val result = (marvelCharacters.data as Data).results
+            result!!.forEach {
+                Log.e("details", "${it.name} ${it.id} ${it.description}")
+            }
 
-        result!!.forEach {
-            Log.e("details", "${it.name} ${it.id} ${it.description}")
+            if (intent.action == Intent.ACTION_SEARCH) {
+                val query = intent.getStringExtra(SearchManager.QUERY) as String
+            }
         }
+    }
 
-        if (intentResult) {
-            return finish()
+    private fun getAllMarvelCharacters() {
+        try {
+            val allMarvelCharacters = async(CommonPool) {
+                getMarvelCharacters(SecretUtils.publicKey, SecretUtils.privateKey)
+            }
+
+            launch(CommonPool) {
+                result = ((allMarvelCharacters.await() as MarvelCharacters).data as Data).results
+
+                result!!.forEach {
+                    Log.e("after remaking call", "${it.name} ${it.id} ${it.description}")
+                }
+
+            }
+        } catch (exception: Exception) {
+            exception.printStackTrace()
         }
+    }
 
-        if (intent.action == Intent.ACTION_SEARCH) {
-            val query = intent.getStringExtra(SearchManager.QUERY) as String
-        }
-
+    private fun setBottomNavigation() {
         val bottomNavigation = bottom_navigation_main_activity
         bottomNavigation.setOnNavigationItemSelectedListener {
             when(it.itemId) {
                 R.id.marvel_characters -> {
                     toast("Character selected").show()
+                    switchToCharactersTab()
                     true }
                 R.id.marvel_creators -> {
                     toast("Creators").show()
@@ -70,6 +108,12 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
                 else -> true
             }
         }
+    }
+
+    private fun switchToCharactersTab() {
+        supportFragmentManager.beginTransaction()
+                .replace(R.id.frame_layout_main_activity, CharactersFragment(), null)
+                .commit()
     }
 
     private fun switchToStoriesTab() {
