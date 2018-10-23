@@ -9,3 +9,5 @@
 .idea/*
 instapk.log*
 /app/src/main/java/com/noblemajesty/marvel/utils/SecretUtils.kt
+
+.idea/instapk.xml

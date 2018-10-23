@@ -11,29 +11,20 @@ import android.view.MenuItem
 import com.google.gson.Gson
 import com.noblemajesty.marvel.R
 import com.noblemajesty.marvel.contracts.MainActivityContract
-import com.noblemajesty.marvel.models.getCharacters.Data
 import com.noblemajesty.marvel.models.getCharacters.MarvelCharacters
 import com.noblemajesty.marvel.models.getCharacters.Result
-import com.noblemajesty.marvel.utils.MarvelNetworkCall.getMarvelCharacters
-import com.noblemajesty.marvel.utils.SecretUtils
+import com.noblemajesty.marvel.presenters.MainActivityPresenter
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.toast
 
 class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView {
-    private var result: List<Result> = listOf()
-    override fun onCreate() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
+private lateinit var mainActivityPresenter: MainActivityPresenter
+    private var result: List<Result> = listOf()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         Log.e("onCreate", "called again")
-
         setBottomNavigation()
 
         val connectivity = intent.getBooleanExtra("Connectivity", true)
@@ -47,49 +38,55 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
         } else {
             val intentResult = intent.getBooleanExtra("Exit", false)
 
-            if (intentResult) {
-                return finish()
-            }
+            if (intentResult) return finish()
 
-            if (intent.action == Intent.ACTION_SEARCH) {
-                handleSearch()
-            }
+            if (intent.action == Intent.ACTION_SEARCH) { handleSearch() }
 
             val allCharactersIntent : String? = intent.getStringExtra("Characters")
-            val marvelCharacters : MarvelCharacters? = Gson().fromJson(allCharactersIntent, MarvelCharacters::class.java)
-
-            marvelCharacters?.let {
-                result = it.data?.results ?: return@let
-                result.forEach {
-                    Log.e("details", "${it.name} ${it.id} ${it.description}")
+            allCharactersIntent.let { _ ->
+                val marvelCharacters : MarvelCharacters? = Gson()
+                        .fromJson(allCharactersIntent, MarvelCharacters::class.java)
+                marvelCharacters?.let { it ->
+                    result = it.data?.results ?: return@let
+                    result.forEach {
+                        Log.e("details", "${it.name} ${it.id} ${it.description}")
+                    }
                 }
             }
-
         }
     }
 
     private fun displayErrorSnackbar() {
-        Snackbar.make(container_main_activity, getString(R.string.main_activity_no_connectivity), Snackbar.LENGTH_INDEFINITE)
+        Snackbar.make(container_main_activity,
+                getString(R.string.main_activity_no_connectivity),
+                Snackbar.LENGTH_INDEFINITE)
                 .setAction("Retry") { getAllMarvelCharacters() }
                 .show()
     }
+    override fun onGetAllMarvelCharacterSuccess(marvelCharacters: MarvelCharacters?) {
+        marvelCharacters?.let { it -> Log.e("Characters", it.toJson().toString()) }
+    }
+
+    override fun onGetAllMarvelCharacterError() = displayErrorSnackbar()
 
     private fun getAllMarvelCharacters() {
-        val allMarvelCharacters = async(CommonPool) {
-            getMarvelCharacters(SecretUtils.publicKey, SecretUtils.privateKey)
-        }
-
-        launch(CommonPool) {
-            try {
-                result = allMarvelCharacters.await()?.data?.results ?: return@launch
-                result.forEach {
-                    Log.e("after remaking call", "${it.name} ${it.id} ${it.description}")
-                }
-            } catch(error: Exception) {
-                Log.e("Error in MainActivity", error.message)
-                displayErrorSnackbar()
-            }
-        }
+        mainActivityPresenter = MainActivityPresenter(this)
+        mainActivityPresenter.getAllMarvelCharacters()
+//        val allMarvelCharacters = async(CommonPool) {
+//            getMarvelCharacters(SecretUtils.publicKey, SecretUtils.privateKey)
+//        }
+//
+//        launch(CommonPool) {
+//            try {
+//                result = allMarvelCharacters.await()?.data?.results ?: return@launch
+//                result.forEach {
+//                    Log.e("after remaking call", "${it.name} ${it.id} ${it.description}")
+//                }
+//            } catch(error: Exception) {
+//                Log.e("Error in MainActivity", error.message)
+//                displayErrorSnackbar()
+//            }
+//        }
     }
 
     private fun setBottomNavigation() {
@@ -149,10 +146,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         return when (item!!.itemId) {
-            R.id.action_search_marvel -> {
-                onSearchRequested()
-                true
-            }
+            R.id.action_search_marvel -> { onSearchRequested() }
             else -> true
         }
     }
@@ -168,6 +162,11 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         startActivity(intent)
         return super.onBackPressed()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mainActivityPresenter.onStop()
     }
 
 }

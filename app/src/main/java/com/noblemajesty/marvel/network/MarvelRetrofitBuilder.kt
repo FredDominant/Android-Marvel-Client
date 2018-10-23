@@ -4,21 +4,24 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
 class MarvelRetrofitBuilder (private val timeStamp: String, private val pk: String, private val hash: String) {
 
-    val baseUrl = "https://gateway.marvel.com/"
+    companion object {
+        const val baseUrl = "https://gateway.marvel.com/"
+    }
 
-    fun getInterceptor() : Interceptor = MarvelInterceptor(timeStamp, pk, hash)
+    private fun getInterceptor() : Interceptor = MarvelInterceptor(timeStamp, pk, hash)
 
-    fun getHttpLoggingInterceptor() : HttpLoggingInterceptor{
+    private fun getHttpLoggingInterceptor() : HttpLoggingInterceptor{
         val loggingInterceptor = HttpLoggingInterceptor()
         loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
         return loggingInterceptor
     }
 
-    fun getClient() : OkHttpClient {
+    private fun getClient() : OkHttpClient {
         return OkHttpClient()
                 .newBuilder()
                 .addInterceptor(getInterceptor())
@@ -26,12 +29,13 @@ class MarvelRetrofitBuilder (private val timeStamp: String, private val pk: Stri
                 .build()
     }
 
-    fun getBuilder() : Retrofit {
+    private fun getBuilder() : Retrofit {
         return Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .client(getClient())
-                .build()!!
+                .build()
     }
 
     fun getService() : MarvelService {
