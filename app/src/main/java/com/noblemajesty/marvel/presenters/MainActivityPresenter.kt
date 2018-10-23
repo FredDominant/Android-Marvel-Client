@@ -8,18 +8,28 @@ import io.reactivex.disposables.Disposable
 
 class MainActivityPresenter(val view: MainActivityContract.MainActivityView):
         MainActivityContract.MainActivityPresenterInterface {
-    private lateinit var getAllCharactersDisposable: Disposable
+
+    override fun getMarvelStories() {
+
+    }
+
     private val compositeDisposable = CompositeDisposable()
 
     override fun getAllMarvelCharacters() {
-        getAllCharactersDisposable = MarvelNetworkCall
+        val getAllCharactersDisposable = MarvelNetworkCall
                 .getMarvelCharacters(SecretUtils.publicKey, SecretUtils.privateKey)
                 .subscribe({ it -> view.onGetAllMarvelCharacterSuccess(it) },
                         { view.onGetAllMarvelCharacterError() })
         compositeDisposable.add(getAllCharactersDisposable)
     }
 
-    override fun getAllComics() { }
+    override fun getAllComics() {
+        val getAllComics = MarvelNetworkCall
+                .getMarvelComics(SecretUtils.publicKey, SecretUtils.privateKey)
+                .subscribe({ it -> view.onGetMarvelComicsSuccess(it) },
+                        { view.onGetMarvelComicsError() })
+        compositeDisposable.addAll(getAllComics)
+    }
 
     override fun onStop() {
         compositeDisposable.clear()

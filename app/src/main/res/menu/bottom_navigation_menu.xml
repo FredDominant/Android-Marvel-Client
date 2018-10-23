@@ -10,9 +10,9 @@
     app:showAsAction="ifRoom"/>
 
   <item
-    android:id="@+id/marvel_stories"
+    android:id="@+id/marvel_comics"
     android:enabled="true"
-    android:title="Stories"
+    android:title="Comics"
     android:icon="@drawable/ic_stories_black_24dp"
     app:showAsAction="ifRoom"/>
 

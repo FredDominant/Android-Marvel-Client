@@ -13,13 +13,14 @@ import com.noblemajesty.marvel.R
 import com.noblemajesty.marvel.contracts.MainActivityContract
 import com.noblemajesty.marvel.models.getCharacters.MarvelCharacters
 import com.noblemajesty.marvel.models.getCharacters.Result
+import com.noblemajesty.marvel.models.getComics.MarvelComics
 import com.noblemajesty.marvel.presenters.MainActivityPresenter
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.toast
 
 class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView {
 
-private lateinit var mainActivityPresenter: MainActivityPresenter
+    private val mainActivityPresenter = MainActivityPresenter(this)
     private var result: List<Result> = listOf()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +35,7 @@ private lateinit var mainActivityPresenter: MainActivityPresenter
                 .commit()
 
         if (!connectivity) {
-            displayErrorSnackbar()
+            displayErrorSnackbar(::doNothing)
         } else {
             val intentResult = intent.getBooleanExtra("Exit", false)
 
@@ -56,21 +57,14 @@ private lateinit var mainActivityPresenter: MainActivityPresenter
         }
     }
 
-    private fun displayErrorSnackbar() {
+    fun displayErrorSnackbar(callback: () -> Unit?) {
         Snackbar.make(container_main_activity,
                 getString(R.string.main_activity_no_connectivity),
                 Snackbar.LENGTH_INDEFINITE)
-                .setAction("Retry") { getAllMarvelCharacters() }
+                .setAction("Retry") { callback() }
                 .show()
     }
-    override fun onGetAllMarvelCharacterSuccess(marvelCharacters: MarvelCharacters?) {
-        marvelCharacters?.let { it -> Log.e("Characters", it.toJson().toString()) }
-    }
-
-    override fun onGetAllMarvelCharacterError() = displayErrorSnackbar()
-
     private fun getAllMarvelCharacters() {
-        mainActivityPresenter = MainActivityPresenter(this)
         mainActivityPresenter.getAllMarvelCharacters()
 //        val allMarvelCharacters = async(CommonPool) {
 //            getMarvelCharacters(SecretUtils.publicKey, SecretUtils.privateKey)
@@ -89,6 +83,20 @@ private lateinit var mainActivityPresenter: MainActivityPresenter
 //        }
     }
 
+    private fun getMarvelComics() = mainActivityPresenter.getAllComics()
+
+    override fun onGetAllMarvelCharacterSuccess(marvelCharacters: MarvelCharacters?) {
+        marvelCharacters?.let { it -> Log.e("Characters", it.toJson().toString()) }
+    }
+    override fun onGetMarvelComicsSuccess(marvelComics: MarvelComics?) {
+        marvelComics?.let {
+        }
+    }
+
+    override fun onGetMarvelComicsError() = displayErrorSnackbar(::getMarvelComics)
+
+    override fun onGetAllMarvelCharacterError() = displayErrorSnackbar(::getAllMarvelCharacters)
+
     private fun setBottomNavigation() {
         val bottomNavigation = bottom_navigation_main_activity
         bottomNavigation.setOnNavigationItemSelectedListener {
@@ -101,9 +109,9 @@ private lateinit var mainActivityPresenter: MainActivityPresenter
                     toast("Creators").show()
                     switchToCreatorsTab()
                     true }
-                R.id.marvel_stories -> {
-                    toast("Stories selected").show()
-                    switchToStoriesTab()
+                R.id.marvel_comics -> {
+                    toast("Comics selected").show()
+                    switchToComicsTab()
                     true }
                 R.id.marvel_events -> {
                     toast("Events selected").show()
@@ -121,9 +129,9 @@ private lateinit var mainActivityPresenter: MainActivityPresenter
                 .commit()
     }
 
-    private fun switchToStoriesTab() {
+    private fun switchToComicsTab() {
         supportFragmentManager.beginTransaction()
-                .replace(R.id.frame_layout_main_activity, StoriesFragment(), null)
+                .replace(R.id.frame_layout_main_activity, ComicsFragment(), null)
                 .commit()
     }
 
@@ -169,4 +177,5 @@ private lateinit var mainActivityPresenter: MainActivityPresenter
         mainActivityPresenter.onStop()
     }
 
+    private fun doNothing() { Log.e("Error", "Error") }
 }

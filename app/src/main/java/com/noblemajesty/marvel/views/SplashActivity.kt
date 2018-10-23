@@ -5,10 +5,13 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import com.noblemajesty.marvel.contracts.MainActivityContract
 import com.noblemajesty.marvel.models.getCharacters.MarvelCharacters
+import com.noblemajesty.marvel.models.getComics.MarvelComics
 import com.noblemajesty.marvel.presenters.MainActivityPresenter
 import com.noblemajesty.marvel.utils.NetworkConnectivity
 
 class SplashActivity : AppCompatActivity(), MainActivityContract.MainActivityView {
+
+
     private lateinit var mainActivityPresenter: MainActivityPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,5 +63,8 @@ class SplashActivity : AppCompatActivity(), MainActivityContract.MainActivityVie
             startActivity(mainActivityIntent)
         }
     }
+    override fun onGetMarvelComicsSuccess(marvelComics: MarvelComics?) { }
+
+    override fun onGetMarvelComicsError() { }
 }
 
