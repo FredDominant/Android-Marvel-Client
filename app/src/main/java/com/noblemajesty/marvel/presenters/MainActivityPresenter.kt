@@ -1,12 +1,13 @@
 package com.noblemajesty.marvel.presenters
 
+import android.content.Context
+import android.util.Log
 import com.noblemajesty.marvel.contracts.MainActivityContract
 import com.noblemajesty.marvel.utils.MarvelNetworkCall
 import com.noblemajesty.marvel.utils.SecretUtils
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 
-class MainActivityPresenter(val view: MainActivityContract.MainActivityView):
+class MainActivityPresenter(private val context: Context, val view: MainActivityContract.MainActivityView):
         MainActivityContract.MainActivityPresenterInterface {
 
     override fun getMarvelStories() {
@@ -17,21 +18,24 @@ class MainActivityPresenter(val view: MainActivityContract.MainActivityView):
 
     override fun getAllMarvelCharacters() {
         val getAllCharactersDisposable = MarvelNetworkCall
-                .getMarvelCharacters(SecretUtils.publicKey, SecretUtils.privateKey)
+                .getMarvelCharacters(context, SecretUtils.publicKey, SecretUtils.privateKey)
                 .subscribe({ it -> view.onGetAllMarvelCharacterSuccess(it) },
                         { view.onGetAllMarvelCharacterError() })
         compositeDisposable.add(getAllCharactersDisposable)
     }
 
     override fun getAllComics() {
+        Log.e("Method", "callllllllllllllllllllleeeeeeedddddddd")
         val getAllComics = MarvelNetworkCall
-                .getMarvelComics(SecretUtils.publicKey, SecretUtils.privateKey)
-                .subscribe({ it -> view.onGetMarvelComicsSuccess(it) },
-                        { view.onGetMarvelComicsError() })
+                .getMarvelComics(context, SecretUtils.publicKey, SecretUtils.privateKey)
+                .subscribe({ it ->
+                    Log.e("Api", "calllllllllllllllllllll")
+                    view.onGetMarvelComicsSuccess(it) },
+                        { it -> view.onGetMarvelComicsError(it) })
         compositeDisposable.addAll(getAllComics)
     }
 
     override fun onStop() {
-        compositeDisposable.clear()
+        compositeDisposable.dispose()
     }
 }

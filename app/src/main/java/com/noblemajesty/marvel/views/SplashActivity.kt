@@ -16,7 +16,7 @@ class SplashActivity : AppCompatActivity(), MainActivityContract.MainActivityVie
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mainActivityPresenter = MainActivityPresenter(this)
+        mainActivityPresenter = MainActivityPresenter(this, this)
 
         val intentResult = intent.getBooleanExtra("Exit", false)
 
@@ -26,26 +26,6 @@ class SplashActivity : AppCompatActivity(), MainActivityContract.MainActivityVie
 
         if (connectivityChecker) {
             mainActivityPresenter.getAllMarvelCharacters()
-//            MarvelNetworkCall.getMarvelCharacters(SecretUtils.publicKey, SecretUtils.privateKey)
-//                    .subscribe(
-//                            { it -> Log.e("Characters --->", "${it.data?.total}")},
-//                            {})
-//            val dataFromServer = async(CommonPool) {
-//                getMarvelCharacters(SecretUtils.publicKey, SecretUtils.privateKey)
-//            }
-//
-//            launch(CommonPool) {
-//                val intent = Intent(this@SplashActivity, MainActivity::class.java)
-//                try {
-//                    val data = dataFromServer.await() as MarvelCharacters
-//
-//                    intent.putExtra("Characters", data.toJson().toString())
-//                    startActivity(intent)
-//                } catch (error: Exception) {
-//                    Log.e("Network Error", error.message)
-//                    sendErrorIntent()
-//                }
-//            }
         } else { sendErrorIntent() }
     }
 
@@ -65,6 +45,6 @@ class SplashActivity : AppCompatActivity(), MainActivityContract.MainActivityVie
     }
     override fun onGetMarvelComicsSuccess(marvelComics: MarvelComics?) { }
 
-    override fun onGetMarvelComicsError() { }
+    override fun onGetMarvelComicsError(it: Throwable) { }
 }
 

@@ -22,35 +22,34 @@ import com.noblemajesty.marvel.presenters.MainActivityPresenter
  *
  */
 class ComicsFragment : Fragment(), MainActivityContract.MainActivityView {
-    private val mainActivityPresenter = MainActivityPresenter (this)
-
+    private lateinit var mainActivityPresenter: MainActivityPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        mainActivityPresenter = MainActivityPresenter (activity!!.applicationContext, this)
+        getAllComics()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        getAllComics()
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_stories, container, false)
     }
 
     private fun getAllComics() = mainActivityPresenter.getAllComics()
 
-
     override fun onGetAllMarvelCharacterSuccess(marvelCharacters: MarvelCharacters?) { }
 
     override fun onGetAllMarvelCharacterError() { }
 
     override fun onGetMarvelComicsSuccess(marvelComics: MarvelComics?) {
-        Log.e("Herrrrrrreee", "Hrreeeeeeeeeeeeeeeeeeeeeee")
-        marvelComics?.let { it -> Log.e("Comics>>>>", "${it.data.results}") }
+        marvelComics?.let { it -> Log.e("Comics>>>>", "${it.data}") }
     }
 
-    override fun onGetMarvelComicsError() {
-        (activity!! as? MainActivity)!!
-                .displayErrorSnackbar(::getAllComics)
+    override fun onGetMarvelComicsError(it: Throwable) {
+        Log.e("Error message", "$it")
+        Log.e("Stack trace", "${it.stackTrace}")
+        (activity!! as? MainActivity)!!.displayErrorSnackbar(::getAllComics)
     }
 
 }

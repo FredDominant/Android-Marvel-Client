@@ -20,7 +20,7 @@ import org.jetbrains.anko.toast
 
 class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView {
 
-    private val mainActivityPresenter = MainActivityPresenter(this)
+    private val mainActivityPresenter = MainActivityPresenter(this, this)
     private var result: List<Result> = listOf()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
         }
     }
 
-    override fun onGetMarvelComicsError() = displayErrorSnackbar(::getMarvelComics)
+    override fun onGetMarvelComicsError(it: Throwable) = displayErrorSnackbar(::getMarvelComics)
 
     override fun onGetAllMarvelCharacterError() = displayErrorSnackbar(::getAllMarvelCharacters)
 

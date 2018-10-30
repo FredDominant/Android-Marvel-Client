@@ -9,7 +9,7 @@ interface MainActivityContract {
         fun onGetAllMarvelCharacterSuccess(marvelCharacters: MarvelCharacters?)
         fun onGetAllMarvelCharacterError()
         fun onGetMarvelComicsSuccess(marvelComics: MarvelComics?)
-        fun onGetMarvelComicsError()
+        fun onGetMarvelComicsError(it: Throwable)
     }
 
     interface MainActivityPresenterInterface {
