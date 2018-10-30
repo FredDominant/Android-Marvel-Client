@@ -1,10 +1,14 @@
 package com.noblemajesty.marvel.views
 
+import android.app.Notification
+import android.app.NotificationManager
+import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 
 import com.noblemajesty.marvel.R
 
@@ -35,12 +39,28 @@ class CharactersFragment : Fragment() {
         }
     }
 
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_chracters, container, false)
+
+        val view = inflater.inflate(R.layout.fragment_chracters, container, false)
+        val button = view.findViewById<Button>(R.id.notificationButton)
+        button.setOnClickListener { _ -> onNotificationButttonClick() }
+        return view
     }
 
+    private fun onNotificationButttonClick() {
+        val notificationManager = activity!!.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+        val notification = Notification.Builder(activity!!.applicationContext).apply {
+            setContentTitle("New Notification from Marvel!")
+            setContentText("A new comic is available, do not miss out")
+            setSmallIcon(R.drawable.notification_template_icon_bg)
+        }
+
+        notificationManager.apply {
+            this?.notify(0, notification.build().apply { flags = Notification.FLAG_AUTO_CANCEL })
+        }
+    }
 
     companion object {
         /**
@@ -53,12 +73,15 @@ class CharactersFragment : Fragment() {
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-                CharactersFragment().apply {
-                    arguments = Bundle().apply {
-                        putString(ARG_PARAM1, param1)
-                        putString(ARG_PARAM2, param2)
-                    }
+        fun newInstance(param1: String, param2: String) : CharactersFragment {
+            return CharactersFragment().apply {
+                arguments = Bundle().apply {
+                    putString(param1, "")
+                    putString(param2, "")
                 }
+            }
+        }
+
     }
+
 }
